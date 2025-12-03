@@ -122,27 +122,41 @@ def setup_rag():
     db = Chroma.from_documents(documents=texts, embedding=embeddings, persist_directory="./chroma_db")
     return db
 
-# --- 5. CÉREBRO DO ROBÔ (AQUI ESTAVA O ERRO) ---
+# --- 5. CÉREBRO DO ROBÔ (VERSÃO BLINDADA) ---
 def get_qa_chain(db):
+    # Configuração do Modelo com regra de parada
     llm = BedrockLLM(
         client=bedrock_client,
         model_id="amazon.titan-text-express-v1",
-        model_kwargs={"temperature": 0.1, "maxTokenCount": 512}
+        model_kwargs={
+            "temperature": 0.0, # Zero criatividade para evitar alucinação
+            "maxTokenCount": 512,
+            "stopSequences": ["Question:", "Human:"] # Força ele a parar se tentar criar nova pergunta
+        }
     )
     
+    # Prompt mais rigoroso
     template = """
-    You are a medical AI assistant specialized in Amyotrophic Lateral Sclerosis (ALS).
-    Use the context provided below to answer the question.
+    Instruction: You are a medical AI assistant specialized in Amyotrophic Lateral Sclerosis (ALS).
+    Your task is to answer the question based ONLY on the provided context.
     
-    Context: {context}
+    Rules:
+    1. If the exact answer is not in the context, say "I don't have enough information in the documents."
+    2. Do NOT guess numbers.
+    3. Do NOT calculate averages or statistics if they are not explicitly written in the text.
+    4. Answer directly, do not repeat the question.
+    
+    <context>
+    {context}
+    </context>
     
     Question: {question}
     
-    Answer (in English):
+    Answer:
     """
+    
     PROMPT = PromptTemplate(template=template, input_variables=["context", "question"])
     
-    # CONFIGURAÇÃO MMR (INTELIGENTE)
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
@@ -154,7 +168,7 @@ def get_qa_chain(db):
         chain_type_kwargs={"prompt": PROMPT}
     )
     
-    return qa_chain  # <--- O RETORNO QUE FALTAVA !!!
+    return qa_chain
 
 # --- 6. EXECUÇÃO ---
 download_files()
