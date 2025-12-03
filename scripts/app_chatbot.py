@@ -197,7 +197,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 if __name__ == '__main__':
     # SEU TOKEN
-    TELEGRAM_TOKEN = "TOKEN_DA_API_VAI_AQUI"
+    TELEGRAM_TOKEN = "TOKEN(API)_VAI_AQUI"
     
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler('start', start))
