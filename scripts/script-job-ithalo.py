@@ -15,8 +15,8 @@ spark = SparkSession.builder.appName("ALSAnalysisColab").getOrCreate()
 print("--- INICIANDO PIPELINE (CORRIGIDO PARA DADOS CATEGÓRICOS) ---")
 
 # --- 2. CAMINHOS ---
-path_entrada = "/content/dados_tratados (1).parquet"
-path_saida = "/content/dataset_final_5classes_v2/"
+path_entrada = "s3://ela-datalake/trusted/dados_tratados.parquet"
+path_saida = "s3://ela-datalake/ml/enriched/dataset_enriquecido/"
 
 # --- 3. LEITURA ---
 try:
